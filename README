@@ -1,0 +1,162 @@
+Task 1:
+
+In rezolvarea acestei probleme, am incercat sa ma folosesc
+de algoritmul Djikstra pentru drumuri minime. Pentru aceasta
+problema mi-am definit o structura de date DGraph, care sa 
+stocheze informatiile necesare de care am nevoie in rezolvare.
+
+Ideea din spate are la baza faptul ca eu pe langa muchiile mele
+unidirectionale, adaug si alte muchii inverse, cate una pentru 
+fiecare muchie existenta in graf. Daca am o muchie originala de la
+"src" la "dest" de cost "weight", muchia inversa va fi de la 
+"dest" la "src" si va avea costul "weight", iar in schimb, muchia
+originala va avea noul cost de valoare 0.
+
+Intuitia din spate este urmatoarea:
+-> daca eu merg de la un nod-sursa la un nod-destinatie doar pe muchii
+de valoare 0, practic merg pe un drum ce contine doar muchii originale
+care nu au fost inversate la un moment dat.
+-> daca eu merg de la un nod-sursa la un nod-destinatie si pe parcurs
+am mers pe o muchie cu weight nenul (adica o muchie inversata), atunci
+costul final al drumului este costul total de "inversiune" pe care a
+trebuit sa il suport ca sa ajung la nodul destinatie.
+
+Intrebarea se pune acum, pe baza acestei intuitii, cum determin ciclul
+de cost minim cerut de cerinta. Pentru asta, aplic urmatorul algoritm:
+
+-> iau fiecare muchie din graf (atat muchiile originale, cat si cele 
+inversate)
+
+-> aleg succesiv, o muchie din acest pool, si o dezactivez atat pe ea,
+cat si pe inversa ei (pe parcursul algoritmului, ajung deci sa 
+dezactivez orice muchie de doua ori)
+
+-> pornesc cu algoritmul Djikstra din nodul sursa al muchiei spre nodul
+destinatie (o muchie dezactivata este ca o muchie stearsa, algoritmul
+nu o ia in considerare in calculul drumului minim)
+
+-> costul minim al drumului pe care il am in nodul destinatie reprezinta
+costul de inversiune minim care a fost suportat pentru a gasi un drum 
+minim (daca muchiile originale constituie un drum direct, atunci acest
+cost final este fireste 0).
+
+-> adun costul muchiei dezactivate de la destinatie la sursa la costul
+drumului minim obtinut si, practic, acela este costul ciclului meu care
+include si muchia dezactivata.
+
+-> activez muchiile dezactivate si repet procesul pentru toate muchiile 
+din graf, iar la final, afisez costul minim al unui ciclu
+
+Observatia este ca daca eu, la un moment dat, ajung sa calculez un ciclu
+de valoare 0, asta inseamna ca graful initial avea deja un ciclu, si ma 
+opresc direct din algoritm, afisand raspunsul 0.
+
+Unele grafuri pot sa nu aiba deloc cicluri, oricat am inversa o muchie,
+iar din Djikstra ne vom da seama si de asta. In codul meu, am pus o 
+conditie de totalSteps care nu ma lasa sa rulez algoritmul mai mult de 
+N iteratii. Daca eu aveam un nod izolat, algoritmul de cautare ar fi 
+rulat la infinit, si prin aceasta conditie, evit acest scenariu.
+Un graf fara cicluri este un graf al carui minCostCycle ramane setat
+la valoarea initiala INFINIT.
+
+Algoritmul acesta se incadreaza in timp si da in cele mai multe cazuri
+raspunsul corect.
+
+Task 2:
+
+Pentru task-ul 2 am folosit algoritmul lui Floyd-Warshall care imi returneaza matricea tuturor distantelor minime de la fiecare element la oricare altul.
+
+Acesta functioneaza astfel: Se initializeaza matricea cu distante foarte mari sau cu costul de
+la i la nod in cazul in care acesta exista. Apoi, pentru fiecare element in parte, se parcurge
+matricea. Pot interveni 2 cazuri:
+
+1) elementul la care am ajuns in matrice nu are "drum" catre cel initial, deci se trece mai
+departe
+2) elementul la care am ajuns are legatura catre elementul initial, deci se verifica daca
+suma distantelor de la initial la intermediar, si de la intermediar la final este mai mica
+decat distanta directa. Daca da, se modifica valoarea.
+
+Aleg liniile reprezentantilor si compar pentru a salva in vectorul de costruri
+doar costurile minime pentru fiecare element.
+
+Problema acestui algoritm este ca avand complexitatea o(n^3), nu intra in timpi la testele mai
+mari.
+
+Task 3:
+
+Pentru task-ul 3 am folosit 2 BFS-uri. Unul de la inceput in care salvam distanta minima de la
+primul nod la toate celelalte si returnam distanta minima pana la cel final din query.
+
+Daca distanta minima este diferita de 0, atunci fac cel de-al doilea BFS in care parcurg doar
+nodurile care au distanta minima egala cu cea a parintelui - 1. Pentru asta, m-am folosit de
+o structura "element" in care am salvat nivelul pe care se afla fiecare element si valoarea sa.
+Din acest BFS am adaugat intr-un vector de "elemente" toate valorile care respectau conditia.
+Apoi am parcurs vectorul de "elemente" si am adugat in alt vector doar valorile ale caror
+niveluri nu se mai repetau.
+
+In final, sortez cu qsort vectorul si il afisez, alaturi de numarul de elemente repetate.
+
+Task 4:
+
+Pentru task-ul 4 m-am ajutat de structura queue:
+In primul rand, fac o citire din fisier. Cand creez matricea verific daca elementul gasit
+este 2, adica pozitia initiala a personajului. Daca am gasit pozitia acestuia, o salvez
+si o adaug in queue. Folosesc 2 cozi pentru a nu se suprapune elementele.
+
+Creez o matrice paralela in care sa retin daca pozitiile respective sunt vizitate deja sau nu.
+Daca la pasul i ma opresc pe pozitia x y, modific valoarea initiala cu i. Adaug fiecare pozitie
+finala in coada auxiliara nq si merg mai departe pana dau de perete. Apoi scot pozitia
+respectiva din queue dar inainte sa trec la urmatorul adaug toate pozitiile noi in q pentru a
+putea verifica in continuare incepand de la fiecare dintre ele. Astfel, verific "in acelasi
+timp" toate directiile posibile.
+
+La final, in coada vor ramane doar pozitiile finale, iar lungimea cozii va fii de fapt numarul
+de pozitii finale.
+
+BONUS
+
+Pentru aceasta problema, am mers pe o solutie care are la baza
+algoritmul lui Kruskal pentru arbori minimi de acoperire. Un arbore
+minim de acoperire centralizeaza subgraful de n-1 muchii cu costul
+cel mai mic posibil, iar algoritmul lui Kruskal ajunge la acest 
+arbore folosindu-se de notiunea de "paduri disjuncte".
+
+Doua noduri care se afla in doua paduri disjuncte nu comunica prin
+nicio muchie. Pe de alta parte, doua noduri care se afla in aceeasi
+padure, au cu siguranta un drum care le uneste. De asemenea, mergand
+pe algoritmul lui Kruskal, voi construi mereu incepand de la cele mai
+ieftine muchii la cele mai costisitoare si mereu voi incerca sa gasesc
+cea mai ieftina muchie care uneste doua paduri disjuncte la un pas.
+
+Reunind toate aceste observatii, se poate concluziona ca pentru a gasi
+drumul intre doua noduri al carui muchie maxima are costul minim, 
+trebuie sa am in vedere care este acea muchie care reuneste padurile 
+disjuncte ale nodurilor sursa si destinatie. Aceasta muchie gasita imi 
+ganranteaza ca nodurile au un drum intre ele si ca acel drum respecta 
+proprietatea din enunt.
+
+Pentru implementarea mea, nu a fost nevoie sa ma folosesc de niste structuri
+complicate de date, ci de o structura pentru o muchie Edge, si o structura
+pentru un query Query. Structura Edge imi memoreaza capetele muchiei, precum
+si costul acesteia, pe cand structura Query imi memoreaza nodul sursa si
+destinatie pentru un query, precum si raspunsul acestuia. Am un vector de 
+Query unde centralizez toate aceste raspunsuri, si pe le scriu la final in
+fisier.
+
+Functiile find si merge sunt functiile standard din cadrul algoritmului
+union-set. Find cauta radacina unei paduri, iar merge realizeaza unirea
+a doua paduri disjuncte.
+
+Initial, algoritmul meu functiona corect, dar pentru ca faceam cate un
+arbore minim de acoperire pentru fiecare query, timpii de executie nu
+erau foarte buni. Astfel ca, in loc sa reconstruiesc arborele de la zero
+de fiecare data, il construiesc o data si verific succesiv daca o pereche
+de nod sursa-destinatie face parte din aceeasi padure disjuncta. Altfel
+spus, adaug o muchie noua in arbore, unesc cele doua paduri in cauza, iar
+dupa, iau fiecare query la rand si verific daca acea muchie e raspunsul.
+
+Algoritmul se opreste ori dupa ce am raspuns la toate query-urile (actiune
+pe care eu o realizez cu functia checkQueries), ori dupa ce am adaugat
+deja n-1 muchii (exact cate sunt prevazute pentru arborele minim de acoperire).
+
+La final, iau vectorul de queries si scriu in fisier raspunsurile.
